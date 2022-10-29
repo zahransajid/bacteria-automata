@@ -2,12 +2,13 @@ import pandas as pd
 
 
 class TransitionFunction:
-    def __init__(self, fp: str):
+    def __init__(self, fp: str, dead_state: int = -1):
         """Creates a TransitionFunction object given file path to its .csv definition file
 
         Args:
             fp (str): Path to definition file
         """
+        self.dead_state = dead_state
         self.transition_table = pd.read_csv(fp)
         self.lexicon = list(self.transition_table.keys())[1:]
         self.states = self.transition_table["state"].to_list()
@@ -25,8 +26,8 @@ class TransitionFunction:
         Returns:
             int: The next state
         """
-        if state == -1:
-            return -1
+        if state == self.dead_state:
+            return self.dead_state
         if (input_string in self.lexicon) and (state in self.states):
             out = self.transition_table.query(f"state == {state}")[
                 str(input_string)
@@ -64,7 +65,7 @@ class DFA:
 
     @property
     def is_dead(self):
-        return self.current == -1
+        return self.current == self.transition_function.dead_state
 
     @property
     def is_sucessful(self):
